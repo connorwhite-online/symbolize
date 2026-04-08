@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+button:active {
+  transform: scale(0.97);
+}
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+}
+
+.footer-pop-first,
+.footer-pop-second {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, 0) scale(0.75);
+  opacity: 0;
+  pointer-events: auto;
+  transition: transform 150ms ease-in 300ms, opacity 150ms ease-in 300ms;
+}
+
+.group:hover .footer-pop-first {
+  transform: translate(calc(-50% - 20px), calc(-100% - 8px)) scale(1);
+  opacity: 1;
+  transition: transform 200ms ease-out, opacity 200ms ease-out;
+}
+
+@keyframes theme-spin {
+  0% { transform: rotate(0deg) scale(1); filter: blur(0px); opacity: 1; }
+  45% { transform: rotate(190deg) scale(0.75); filter: blur(1px); opacity: 0.5; }
+  75% { transform: rotate(368deg) scale(1.04); filter: blur(0px); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); filter: blur(0px); opacity: 1; }
+}
+
+.theme-spin {
+  animation: theme-spin 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.group:hover .footer-pop-second {
+  transform: translate(calc(-50% + 20px), calc(-100% - 8px)) scale(1);
+  opacity: 1;
+  transition: transform 200ms ease-out 40ms, opacity 200ms ease-out 40ms;
+}

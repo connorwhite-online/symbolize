@@ -1,0 +1,7 @@
+export default function UploadIcon({ className }: { className?: string }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M20 12.75V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V12.75M12 4V15.25M12 4L16.5 8.5M12 4L7.5 8.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
