@@ -44,3 +44,35 @@ button:active {
   opacity: 1;
   transition: transform 200ms ease-out 40ms, opacity 200ms ease-out 40ms;
 }
+
+@keyframes logo-shapes-cycle {
+  0%, 35% { opacity: 1; transform: rotate(0deg) scale(1); filter: blur(0); }
+  50%, 85% { opacity: 0; transform: rotate(180deg) scale(0.55); filter: blur(6px); }
+  100% { opacity: 1; transform: rotate(360deg) scale(1); filter: blur(0); }
+}
+
+@keyframes logo-apple-cycle {
+  0%, 35% { opacity: 0; transform: rotate(-15deg) scale(0.6); filter: blur(6px); }
+  50%, 85% { opacity: 1; transform: rotate(0deg) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: rotate(15deg) scale(0.6); filter: blur(6px); }
+}
+
+.logo-shapes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-shapes-cycle 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.logo-apple {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-apple-cycle 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-shapes,
+  .logo-apple {
+    animation: none;
+  }
+  .logo-apple { display: none; }
+}

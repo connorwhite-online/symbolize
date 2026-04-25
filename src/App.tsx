@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import DropZone from "./components/DropZone";
 import ExportQueue from "./components/ExportQueue";
+import Logo from "./components/Logo";
 import ThemeToggle from "./components/ThemeToggle";
 import { TooltipProvider } from "./components/Tooltip";
 import { useTheme } from "./lib/useTheme";
@@ -98,7 +99,7 @@ export default function App() {
       <div className="mx-auto max-w-2xl px-6 py-16 pb-24">
         <header className="mb-8">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Symbolize" className="h-8 w-8" />
+            <Logo className="h-8 w-8" />
             <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
               Symbolize
             </h1>

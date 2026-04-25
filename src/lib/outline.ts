@@ -136,6 +136,7 @@ function convertElement(
     "stroke-linejoin",
     inherited.rootStrokeJoin
   );
+  const fillRule = resolveAttr(el, "fill-rule", null);
 
   // SVG default stroke-width is 1 when stroke is present but no width specified
   const resolvedStrokeWidth = strokeWidthStr ? parseFloat(strokeWidthStr) : 1;
@@ -145,8 +146,15 @@ function convertElement(
   const isNoFill = fill === "none" || (!fill && !hasFill);
 
   // Get path data string
-  const pathData = getPathData(el);
+  let pathData = getPathData(el);
   if (!pathData) return null;
+
+  // SF Symbols' compiler ignores fill-rule="evenodd" and uses non-zero winding.
+  // Rewrite the subpaths so cutouts work under non-zero rendering.
+  if (fillRule === "evenodd") {
+    const reoriented = reorientForNonZero(pathData);
+    if (reoriented) pathData = reoriented;
+  }
 
   const results: string[] = [];
 
@@ -179,6 +187,40 @@ function convertElement(
   }
 
   return results.length > 0 ? results.join("\n") : null;
+}
+
+// SF Symbols' template compiler ignores fill-rule="evenodd" and renders with
+// non-zero winding. To preserve cutouts (e.g., the hole inside a frame), reverse
+// the winding of any subpath that is contained inside another so the inner and
+// outer wind in opposite directions.
+function reorientForNonZero(pathData: string): string | null {
+  try {
+    paper.project.clear();
+    const compound = new paper.CompoundPath({ pathData, insert: false });
+    const children =
+      compound.children.length > 0
+        ? (compound.children.slice() as paper.Path[])
+        : [compound as unknown as paper.Path];
+
+    for (const child of children) {
+      const isInside = children.some(
+        (other) =>
+          other !== child &&
+          other.bounds.contains(child.bounds) &&
+          other.bounds.area > child.bounds.area
+      );
+      const path = child as paper.Path;
+      if (isInside && path.clockwise) path.reverse();
+      else if (!isInside && !path.clockwise) path.reverse();
+    }
+
+    const result = compound.pathData;
+    paper.project.clear();
+    return result;
+  } catch (e) {
+    console.warn("Even-odd to non-zero conversion failed:", e);
+    return null;
+  }
 }
 
 function getPathData(el: Element): string | null {
