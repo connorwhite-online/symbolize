@@ -29,6 +29,14 @@ export function removeExport(id: string): ExportItem[] {
   return items;
 }
 
+export function updateExport(id: string, patch: Partial<ExportItem>): ExportItem[] {
+  const items = loadExports().map((i) =>
+    i.id === id ? { ...i, ...patch } : i
+  );
+  saveExports(items);
+  return items;
+}
+
 export function downloadSvg(svgContent: string, filename: string): void {
   const blob = new Blob([svgContent], { type: "image/svg+xml" });
   const url = URL.createObjectURL(blob);

@@ -1,17 +1,27 @@
-import type { ExportItem } from "../lib/template";
+import { useState } from "react";
+import type { ExportItem, SymbolAdjustments } from "../lib/template";
 import { downloadSvg } from "../lib/storage";
 import { Tooltip } from "./Tooltip";
+import TweakDialog from "./TweakDialog";
 import FileIcon from "../icons/FileIcon";
 import DownloadIcon from "../icons/DownloadIcon";
 import DeleteIcon from "../icons/DeleteIcon";
+import TweakIcon from "../icons/TweakIcon";
 
 interface ExportQueueProps {
   items: ExportItem[];
   onRemove: (id: string) => void;
+  onAdjust: (id: string, adjustments: SymbolAdjustments) => void;
 }
 
-export default function ExportQueue({ items, onRemove }: ExportQueueProps) {
+export default function ExportQueue({ items, onRemove, onAdjust }: ExportQueueProps) {
+  const [tweakingId, setTweakingId] = useState<string | null>(null);
+
   if (items.length === 0) return null;
+
+  const tweakingItem = tweakingId
+    ? items.find((i) => i.id === tweakingId) ?? null
+    : null;
 
   return (
     <div className="space-y-3">
@@ -39,6 +49,14 @@ export default function ExportQueue({ items, onRemove }: ExportQueueProps) {
               </div>
             </div>
             <div className="flex items-center gap-1 ml-4">
+              <Tooltip content="Adjust">
+                <button
+                  onClick={() => setTweakingId(item.id)}
+                  className="rounded-lg p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  <TweakIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
               <Tooltip content="Download">
                 <button
                   onClick={() => downloadSvg(item.templateSvg, `${item.name}.svg`)}
@@ -59,6 +77,14 @@ export default function ExportQueue({ items, onRemove }: ExportQueueProps) {
           </div>
         ))}
       </div>
+
+      {tweakingItem && (
+        <TweakDialog
+          item={tweakingItem}
+          onClose={() => setTweakingId(null)}
+          onSave={(adj) => onAdjust(tweakingItem.id, adj)}
+        />
+      )}
     </div>
   );
 }

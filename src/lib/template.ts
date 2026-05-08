@@ -73,12 +73,28 @@ export interface IconVariant {
   fileName: string;
 }
 
+export interface SymbolAdjustments {
+  /** Multiplier on top of the default 1.4x cap-height sizing. */
+  scale: number;
+  /** Horizontal nudge in viewBox units. */
+  offsetX: number;
+  /** Vertical nudge in viewBox units. Positive shifts the icon down. */
+  offsetY: number;
+}
+
+export const DEFAULT_ADJUSTMENTS: SymbolAdjustments = {
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0,
+};
+
 export interface ExportItem {
   id: string;
   name: string;
   variants: IconVariant[];
   templateSvg: string;
   createdAt: number;
+  adjustments?: SymbolAdjustments;
 }
 
 /**
@@ -282,7 +298,8 @@ function buildWeightRanges(assigned: Weight[]): Map<Weight, Weight[]> {
 export function generateTemplate(
   variants: IconVariant[],
   symbolName: string,
-  weightRanges: Map<Weight, Weight[]>
+  weightRanges: Map<Weight, Weight[]>,
+  adjustments: SymbolAdjustments = DEFAULT_ADJUSTMENTS
 ): string {
   // Build a lookup: for every weight slot, find which variant covers it
   const weightToVariant = new Map<Weight, IconVariant>();
@@ -332,7 +349,8 @@ export function generateTemplate(
       // Size the icon to ~1.4x cap height to match Apple's stock SF Symbols.
       const vb = variant.viewBox;
       const iconAspect = vb.width / vb.height;
-      const targetHeight = ch * sf * SYMBOL_TO_CAP_HEIGHT_RATIO;
+      const targetHeight =
+        ch * sf * SYMBOL_TO_CAP_HEIGHT_RATIO * adjustments.scale;
       const targetWidth = targetHeight * iconAspect;
 
       // Center horizontally on the weight column
@@ -344,9 +362,15 @@ export function generateTemplate(
 
       // Center the (oversized) icon vertically on the cap-height region so it
       // overshoots above capline and below baseline by equal amounts.
+      // User-applied offsets (in viewBox units) are scaled into template space.
       const capHeightCenterY = baseline - ch / 2;
-      const translateX = leftX - vb.x * scaleX;
-      const translateY = capHeightCenterY - targetHeight / 2 - vb.y * scaleY;
+      const translateX =
+        leftX - vb.x * scaleX + adjustments.offsetX * scaleX;
+      const translateY =
+        capHeightCenterY -
+        targetHeight / 2 -
+        vb.y * scaleY +
+        adjustments.offsetY * scaleY;
 
       symbolGroups += `  <g id="${weight}-${scale}" transform="matrix(${scaleX.toFixed(6)} 0 0 ${scaleY.toFixed(6)} ${translateX.toFixed(3)} ${translateY.toFixed(3)})">\n`;
       symbolGroups += `   ${variant.paths}\n`;

@@ -11,8 +11,9 @@ import {
   generateTemplate,
   type IconVariant,
   type ExportItem,
+  type SymbolAdjustments,
 } from "./lib/template";
-import { loadExports, addExport, removeExport } from "./lib/storage";
+import { loadExports, addExport, removeExport, updateExport } from "./lib/storage";
 
 function deriveSymbolName(files: File[]): string {
   // Use first filename, strip extension and weight suffixes
@@ -93,6 +94,29 @@ export default function App() {
     setExports(removeExport(id));
   }, []);
 
+  const handleAdjust = useCallback(
+    (id: string, adjustments: SymbolAdjustments) => {
+      setExports((current) => {
+        const item = current.find((i) => i.id === id);
+        if (!item) return current;
+        const { weightRanges } = assignWeights(
+          item.variants.map((v) => ({
+            strokeWidth: v.strokeWidth,
+            fileName: v.fileName,
+          }))
+        );
+        const templateSvg = generateTemplate(
+          item.variants,
+          item.name,
+          weightRanges,
+          adjustments
+        );
+        return updateExport(id, { adjustments, templateSvg });
+      });
+    },
+    []
+  );
+
   return (
     <TooltipProvider>
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -120,7 +144,7 @@ export default function App() {
             </div>
           )}
 
-          <ExportQueue items={exports} onRemove={handleRemove} />
+          <ExportQueue items={exports} onRemove={handleRemove} onAdjust={handleAdjust} />
         </div>
       </div>
       <footer className="fixed bottom-0 left-0 right-0 z-50">

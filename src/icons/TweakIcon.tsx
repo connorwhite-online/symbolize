@@ -1,0 +1,20 @@
+interface TweakIconProps {
+  className?: string;
+}
+
+export default function TweakIcon({ className = "" }: TweakIconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M14 7H4M14 7C14 5.3425 15.3425 4 17 4C18.6575 4 20 5.3425 20 7C20 8.6575 18.6575 10 17 10C15.3425 10 14 8.6575 14 7ZM20 17H12M12 17C12 18.6575 10.6575 20 9 20C7.3425 20 6 18.6575 6 17M12 17C12 15.3425 10.6575 14 9 14C7.3425 14 6 15.3425 6 17M6 17H4" />
+    </svg>
+  );
+}
