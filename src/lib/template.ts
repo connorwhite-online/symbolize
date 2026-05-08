@@ -57,6 +57,11 @@ const SCALE_FACTORS: Record<Scale, number> = {
   L: 1.0,
 };
 
+// Apple's SF Symbols typically render at ~1.4x cap height so the glyph
+// overshoots the baseline/capline guides. Sizing strictly to cap height (1.0x)
+// makes user-imported symbols look about half the visual weight of stock ones.
+const SYMBOL_TO_CAP_HEIGHT_RATIO = 1.4;
+
 // Margin half-width per weight (derived from template; wider symbols get more margin)
 // We'll use a fixed small margin and center the icon in the column
 export interface IconVariant {
@@ -324,25 +329,24 @@ export function generateTemplate(
       const ch = capHeight(scale);
       const sf = SCALE_FACTORS[scale];
 
-      // The icon should fit within the cap height
+      // Size the icon to ~1.4x cap height to match Apple's stock SF Symbols.
       const vb = variant.viewBox;
       const iconAspect = vb.width / vb.height;
-      const targetHeight = ch * sf;
+      const targetHeight = ch * sf * SYMBOL_TO_CAP_HEIGHT_RATIO;
       const targetWidth = targetHeight * iconAspect;
 
       // Center horizontally on the weight column
       const centerX = WEIGHT_CENTER_X[weight];
       const leftX = centerX - targetWidth / 2;
 
-      // Position: baseline is the bottom of the symbol area, capline is the top
-      // The transform origin is at (leftX, baseline) and we scale the icon to fit
       const scaleX = targetWidth / vb.width;
       const scaleY = targetHeight / vb.height;
 
-      // Transform the icon SVG content into template space
-      // We place it so the bottom aligns with baseline and top with capline
+      // Center the (oversized) icon vertically on the cap-height region so it
+      // overshoots above capline and below baseline by equal amounts.
+      const capHeightCenterY = baseline - ch / 2;
       const translateX = leftX - vb.x * scaleX;
-      const translateY = baseline - ch - vb.y * scaleY;
+      const translateY = capHeightCenterY - targetHeight / 2 - vb.y * scaleY;
 
       symbolGroups += `  <g id="${weight}-${scale}" transform="matrix(${scaleX.toFixed(6)} 0 0 ${scaleY.toFixed(6)} ${translateX.toFixed(3)} ${translateY.toFixed(3)})">\n`;
       symbolGroups += `   ${variant.paths}\n`;
